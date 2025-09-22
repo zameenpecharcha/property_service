@@ -1,0 +1,3 @@
+"""
+Property service application package.
+""" 
