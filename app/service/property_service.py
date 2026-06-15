@@ -290,8 +290,10 @@ class PropertyService(property_pb2_grpc.PropertyServiceServicer):
 def serve():
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
     property_pb2_grpc.add_PropertyServiceServicer_to_server(PropertyService(), server)
-    server.add_insecure_port('localhost:50053')
-    print("Starting property service on port 50053...")
+    import os
+    port = os.environ.get("PORT", "50054")
+    server.add_insecure_port(f"0.0.0.0:{port}")
+    print(f"Starting property service on port {port}...")
     server.start()
     server.wait_for_termination()
 
