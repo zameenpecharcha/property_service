@@ -291,7 +291,7 @@ def serve():
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
     property_pb2_grpc.add_PropertyServiceServicer_to_server(PropertyService(), server)
     import os
-    port = os.environ.get("GRPC_PORT", "50054")
+    port = os.environ.get("PORT", "50054")
     server.add_insecure_port(f"0.0.0.0:{port}")
     print(f"Starting property gRPC service on port {port}...")
     server.start()
