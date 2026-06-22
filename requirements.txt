@@ -9,3 +9,6 @@ uvicorn
 pydantic
 boto3
 botocore 
+grpcio-reflection
+grpcio-health-checking
+PyJWT

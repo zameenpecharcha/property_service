@@ -287,15 +287,48 @@ class PropertyService(property_pb2_grpc.PropertyServiceServicer):
             context.set_details(f"Exception calling application: {str(e)}")
             return property_pb2.PropertyResponse(success=False, message=str(e))
 
+import os
+import grpc
+from concurrent import futures
+from grpc_reflection.v1alpha import reflection
+from grpc_health.v1 import health, health_pb2, health_pb2_grpc
+
 def serve():
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
-    property_pb2_grpc.add_PropertyServiceServicer_to_server(PropertyService(), server)
-    import os
+
+    property_pb2_grpc.add_PropertyServiceServicer_to_server(
+        PropertyService(), server
+    )
+
+    health_servicer = health.HealthServicer()
+
+    health_pb2_grpc.add_HealthServicer_to_server(
+        health_servicer,
+        server,
+    )
+
+    health_servicer.set(
+        "",
+        health_pb2.HealthCheckResponse.SERVING,
+    )
+
+    SERVICE_NAMES = (
+        property_pb2.DESCRIPTOR.services_by_name[
+            "PropertyService"
+        ].full_name,
+        health_pb2.DESCRIPTOR.services_by_name[
+        "Health"
+        ].full_name,
+        reflection.SERVICE_NAME,
+    )
+
+    reflection.enable_server_reflection(SERVICE_NAMES, server)
+
     port = os.environ.get("PORT", "50054")
+
     server.add_insecure_port(f"0.0.0.0:{port}")
+
     print(f"Starting property gRPC service on port {port}...")
+
     server.start()
     server.wait_for_termination()
-
-if __name__ == "__main__":
-    serve() 
